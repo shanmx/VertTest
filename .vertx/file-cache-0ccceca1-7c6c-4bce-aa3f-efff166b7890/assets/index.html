@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+<head>
+<!-- base需要放到head中 --> 
+<!--   <base href=" <%=basePath%>"> -->
+<meta charset="utf-8"> 
+<title>角色管理</title>
+
+	<link rel="stylesheet" type="text/css" href="jsp/jquery-easyui-1.5.3/themes/bootstrap/easyui.css">
+	<link rel="stylesheet" type="text/css" href="jsp/jquery-easyui-1.5.3/themes/icon.css">
+	<link rel="stylesheet" type="text/css" href="jsp/jquery-easyui-1.5.3/demo/demo.css">
+	<script type="text/javascript" src="jsp/jquery-easyui-1.5.3/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="jsp/jquery-easyui-1.5.3/jquery.easyui.min.js"></script>
+	<script type="text/javascript" >
+	// easyui文件
+		$.messager.defaults = {
+		ok: "是", cancel: "否",
+		draggable:true,
+		modal:true,
+		width:'250px',
+		height:'150px',
+		overflow:'none',
+		left: '30%',
+		right: '30%',
+	};
+	
+	 
+	var url;  
+	$.fn.validatebox.defaults.missingMessage = '该输入项为必输项';
+	function newRole(){
+	$('#dlgRoleInfo').dialog('open').dialog('setTitle','新建角色');
+	$('#fmRoleInfo').form('clear');
+	url = 'insertRole';
+	}
+	function editRole(){
+	var row = $('#datagrid').datagrid('getSelected');
+	if (row){
+		$('#dlgRoleInfo').dialog('open').dialog('setTitle','编辑角色');
+		$('#fmRoleInfo').form('load',row);
+		url = '/role/updateRole';//+row.id;
+	}
+	}
+	
+	function saveRole(){
+	$('#fmRoleInfo').form('submit',{
+		url: url,
+		onSubmit: function(){
+			return $(this).form('validate');
+		},
+		success: function(result){
+			var result = eval('('+result+')');
+			if (result.errorMsg){
+				$.messager.show({
+					title: '错误提示',
+					msg: result.errorMsg
+				});
+			} else {
+				$('#dlgRoleInfo').dialog('close');		// close the dialog
+				$('#datagrid').datagrid('reload');	// reload the Role data
+			}
+		}
+	});
+	}
+	function destroyRole(){
+	var row = $('#datagrid').datagrid('getSelected');
+	if (row){
+		$.messager.confirm('确认','您确认删除这个角色吗?',function(r){
+			if (r){
+				$.post('deleteRole',{id:row.id},function(result){
+					if (result.success){
+						$('#datagrid').datagrid('reload');	// reload the Role data
+					} else {
+						$.messager.show({	// show error message
+							title: '错误提示',
+							msg: result.errorMsg
+						});
+					}
+				},'json');
+			}
+		});
+	}
+	}
+</script>
+</head>
+<body class="easyui-layout section" style="width:100%;height:100%;"  align="center">
+        <div data-options="region:'north'" style="height:10%;background-image: url(jsp/images/grainbanner.jpg)">
+        <h1 align="right" style="animation-play-state: running">中储粮油脂有限公司</h1>
+        	<div>
+		<form id="fmupload" action="./upload" enctype="multipart/form-data" method="post">
+		<input type="file" name="file" value="请选择文件">
+		<input type="submit" name="submit" value="提交">
+		</form>
+		
+		
+		</div>
+        </div>
+        <div data-options="region:'south'" style="height:10%; background-image: url(jsp/images/bottom.jpg)">
+               	<p align="center">友情链接：&nbsp;<a href="http://www.sinograin.com.cn" target="_blank">&nbsp;中储粮总公司&nbsp;</a> <a href="http://fwgs.sinograin.com.cn" target="_blank"> &nbsp;中储粮服务网&nbsp;</a><a href="http://mail.sinograin.com.cn" target="_blank">  &nbsp; 中储粮邮件系统&nbsp;</a></p>
+               	<p align="center">开发单位：中华粮网北京分公司。<a href="mailto:shanmx@vip.sina.com">邮件</a></p>
+        </div>
+        <div data-options="region:'west',split:true" title="导航" style="width:20%;">
+      	  <div class="easyui-panel" title="Menu" style="width:100%;height: 100%">
+			<div class="easyui-menu" data-options="inline:true" style="width:100%">
+				<div onclick="javascript:alert('new')">New</div>
+					<div>
+						<span>Open</span>
+							<div style="width:150px;">
+							<div><b>Word</b></div>
+							<div>Excel</div>
+							<div>PowerPoint</div>
+							<div>
+								<span>M1</span>
+								<div style="width:120px;">
+									<div>sub1</div>
+									<div>sub2</div>
+									<div>
+										<span>Sub</span>
+										<div style="width:80px;">
+											<div onclick="javascript:alert('sub21')">sub21</div>
+											<div>sub22</div>
+											<div>sub23</div>
+										</div>
+									</div>
+									<div>sub3</div>
+								</div>
+							</div>
+							<div>
+								<span>Window Demos</span>
+								<div style="width:120px;">
+									<div data-options="href:'window.html'">Window</div>
+									<div data-options="href:'dialog.html'">Dialog</div>
+									<div><a href="http://www.cngrain.com.cn" target="_blank">中华粮网</a></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div data-options="iconCls:'icon-save'">Save</div>
+					<div data-options="iconCls:'icon-print',disabled:true">Print</div>
+					<div class="menu-sep"></div>
+					<div>Exit</div>
+				</div>
+			</div>
+		</div>
+
+        <div data-options="region:'center',title:'主工作区',iconCls:'icon-ok'"  style="height: 80%" class="animate-enlarge">
+		    
+		    <div id="toolbar">
+				<a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newRole()">新建角色</a>
+				<a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editRole()">编辑角色</a>
+				<a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyRole()">删除角色</a>
+			</div>
+			<table id="datagrid" title="角色管理" class="easyui-datagrid" fit="true" fitcolumns="true"	url="/role/getRoleList" method="get" toolbar="#toolbar"	rownumbers="true" fitColumns="true" singleSelect="true">
+				<thead>
+					<tr>
+						<th field="id" width="100">编号</th>
+						<th field="roleName" width="100">角色名</th>
+						<th field="note" width="100">备注</th>
+					</tr>
+				</thead>
+			</table>
+       </div>  
+       <div id="dlgRoleInfo" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px"
+		closed="true" buttons="#dlgRoleInfo-buttons">
+			<div class="ftitle">角色信息：</div>
+			<form id="fmRoleInfo" method="post">
+				<div class="fitem">
+					<label>编&nbsp;&nbsp;&nbsp;号:</label>
+					<input name="id" class="easyui-validatebox" required="true">
+				</div>
+				<div class="fitem">
+					<label>角色名:</label>
+					<input name="roleName" class="easyui-validatebox" required="true">
+				</div>
+				<div class="fitem">
+					<label>备&nbsp;&nbsp;&nbsp;注:</label>
+					<input name="note" class="easyui-validatebox" required="true">
+				</div>
+				
+			</form>
+		</div>
+		<div id="dlgRoleInfo-buttons">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveRole()">保存</a>
+			<a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgRoleInfo').dialog('close')">取消</a>
+		</div>
+	
+</body> 
+</html>
